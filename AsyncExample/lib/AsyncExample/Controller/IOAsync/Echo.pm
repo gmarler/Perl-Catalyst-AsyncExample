@@ -44,8 +44,7 @@ sub start : ChainedParent
     #$io->set_handle( undef );
 
     $server->add_child(
-      Net::Async::WebSocket::Protocol->new(
-        handle => $io)
+      Net::Async::WebSocket::Protocol->new( handle => $io)
     );
   }
 
