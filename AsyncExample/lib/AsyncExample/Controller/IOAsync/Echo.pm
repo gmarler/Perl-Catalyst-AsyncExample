@@ -1,5 +1,7 @@
 package AsyncExample::Controller::IOAsync::Echo;
 
+use v5.18.1;
+
 use base 'Catalyst::Controller';
 use Protocol::WebSocket::Handshake::Server;
 use Net::Async::WebSocket::Server;
@@ -12,38 +14,42 @@ sub start : ChainedParent
   {
     my ($self, $c) = @_;
     my $url = $c->uri_for_action($self->action_for('ws'));
-    
+
     $url->scheme('ws');
     $c->stash(websocket_url => $url);
     $c->forward($c->view('HTML'));
   }
 
-  sub ws2 :Chained('start') Args(0)
+  sub ws :Chained('start') Args(0)
   {
     my ($self, $c) = @_;
     my $io = $c->req->io_fh;
     my $server = Net::Async::WebSocket::Server->new(
       on_client => sub {
         my ($self, $client) = @_;
+        say "CLIENT CONNECTED";
         $self->send_frame( 'Echo Initiated' );
+
         $client->configure(
           on_frame => sub {
             my ( $self, $frame ) = @_;
+            say "FRAME RECEIVED";
             $self->send_frame( $frame );
           },
         );
       }
     );
 
-    my $fh = $io->read_handle;
-    $io->set_handle( undef );
+    #my $fh = $io->read_handle;
+    #$io->set_handle( undef );
 
     $server->add_child(
       Net::Async::WebSocket::Protocol->new(
-        handle => $fh));
+        handle => $io)
+    );
   }
 
-  sub ws :Chained('start') Args(0)
+  sub ws1 :Chained('start') Args(0)
   {
     my ($self, $c) = @_;
     my $io = $c->req->io_fh;
