@@ -6,6 +6,7 @@ use base 'Catalyst::Controller';
 use Protocol::WebSocket::Handshake::Server;
 use Net::Async::WebSocket::Server;
 use Net::Async::WebSocket::Protocol;
+use Data::Dumper;
 
 sub start : ChainedParent
  PathPart('echo') CaptureArgs(0) { }
@@ -37,16 +38,24 @@ sub start : ChainedParent
             $self->send_frame( $frame );
           },
         );
-      }
+      },
+      on_accept => sub {
+        say "Entering on_accept with args: " . Dumper( \@_ );
+        my ($self) = shift;
+        say "Accepting connection from WebSocket client";
+
+        Net::Async::WebSocket::Protocol->new( handle => $io );
+      },
     );
 
     #$server->add_child(
     #  Net::Async::WebSocket::Protocol->new( handle => $io)
     #);
     #
-    $server->on_accept(
-      Net::Async::WebSocket::Protocol->new( handle => $io )
-    );
+    
+    #$server->on_accept(
+    #  Net::Async::WebSocket::Protocol->new( handle => $io )
+    #);
 
     $c->req->env->{'io.async.loop'}->add( $server );
   }
