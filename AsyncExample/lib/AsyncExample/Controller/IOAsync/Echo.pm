@@ -40,12 +40,15 @@ sub start : ChainedParent
       }
     );
 
-    #my $fh = $io->read_handle;
-    #$io->set_handle( undef );
-
-    $server->add_child(
-      Net::Async::WebSocket::Protocol->new( handle => $io)
+    #$server->add_child(
+    #  Net::Async::WebSocket::Protocol->new( handle => $io)
+    #);
+    #
+    $server->on_accept(
+      Net::Async::WebSocket::Protocol->new( handle => $io )
     );
+
+    $c->req->env->{'io.async.loop'}->add( $server );
   }
 
   sub ws1 :Chained('start') Args(0)
