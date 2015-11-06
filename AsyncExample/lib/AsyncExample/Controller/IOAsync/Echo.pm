@@ -87,8 +87,8 @@ sub ws :Chained('start') Args(0)
     );
 
   # Now the $web_socket handle exists, we write the handshake response out to the
-  # client.
-  
+  # client.  This effectively "kick starts" the stream, so the on_read event can
+  # fire again after the WebSocket handshake is complete.
   if ( $hs->is_done ) {
     say "COMPLETING WebSocket HANDSHAKE WITH CLIENT";
     $web_socket->write($hs->to_string);
@@ -96,41 +96,6 @@ sub ws :Chained('start') Args(0)
   } else {
     say "THE WebSocket HANDSHAKE FAILED!";
   }
-
-  #my $server = Net::Async::WebSocket::Server->new(
-  #on_client => sub {
-  #  my ($self, $client) = @_;
-  #  say "CLIENT CONNECTED";
-  #  $self->send_frame( 'Echo Initiated' );
-
-  #  $client->configure(
-  #    on_frame => sub {
-  #      my ( $self, $frame ) = @_;
-  #      say "FRAME RECEIVED";
-  #      $self->send_frame( $frame );
-  #    },
-  #  );
-  #},
-  #on_accept => sub {
-  #  say "Entering on_accept with args: " . Dumper( \@_ );
-  #  my ($self) = shift;
-  #  say "Accepting connection from WebSocket client";
-
-  #  Net::Async::WebSocket::Protocol->new( handle => $io );
-  #},
-  #);
-
-
-  #$server->add_child(
-  #  Net::Async::WebSocket::Protocol->new( handle => $io)
-  #);
-  #
-  
-  #$server->on_accept(
-  #  Net::Async::WebSocket::Protocol->new( handle => $io )
-  #);
-
-  #$c->req->env->{'io.async.loop'}->add( $server );
 
   $c->req->env->{'io.async.loop'}->add( $web_socket );
 }
