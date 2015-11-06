@@ -81,7 +81,8 @@ sub ws :Chained('start') Args(0)
       on_closed => sub {
         say "on_closed EVENT RECEIVED: " . scalar(@_) . " ARGS RECEIVED";
         my ($stream) = @_;
-        say "CLOSING WebSocket CONNECTION";
+        say "CLOSING WebSocket CONNECTION ON FDS: READER "
+            . $stream->read_fileno . " / WRITER " . $stream->write_fileno;
         $c->req->env->{'io.async.loop'}->remove( $stream );
       },
     );
